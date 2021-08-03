@@ -261,5 +261,126 @@ FROM employees;
 --      부서 코드 : 60 ~ 100 -> C-Group
 --      부서 코드 : 나머지 부서 -> REMAINER
 
+
+-- 방법 1: DECODE 일일이 찍어주기
 SELECT first_name,
-        department_name
+        department_id,
+        DECODE(department_id,
+        10, 'A-Group',
+        20, 'A-Group',
+        30, 'A-Group',
+        40, 'B-Group',
+        50, 'B-Group',
+        60, 'C-Group',
+        70, 'C-Group',
+        80, 'C-Group',
+        90, 'C-Group',
+        100, 'C-Group',
+        'REMAINER')
+        Team
+FROM employees;
+
+
+방법 2: CASE 문 활용
+SELECT first_name,
+        department_id,
+        CASE
+        WHEN department_id Between 10 and 30 THEN 'A-Group'
+        WHEN department_id Between 40 and 50 THEN 'B-Group'
+        WHEN department_id Between 60 and 100 THEN 'C-Group'
+        ELSE 'REMAINER' 
+        END TEAM
+FROM employees;
+
+-- SLACK 연습문제 1:
+-- 전체직원 정보 조회
+-- 입사일(hire_date)의올림차순(ASC)으로 가장선임부터출력
+-- 이름(first_name last_name), 월급(salary), 전화번호(phone_number), 입사일(hire_date) 순서 출력
+-- “이름”, “월급”, “전화번호”, “입사일”로 컬럼 이름을 대체
+SELECT first_name || ' ' || last_name 이름,
+    salary 월급,
+    phone_number 전화번호,
+    hire_date 입사일
+FROM employees
+ORDER BY hire_date;
+
+-- SLACK 연습문제 2:
+-- 업무(jobs)별로 업무이름(job_title)과 최고월급(max_salary)을 월급의 내림차순(DESC)로 정렬
+SELECT job_title,
+    max_salary
+FROM jobs
+ORDER BY max_salary DESC;
+
+-- SLACK 연습문제 3:
+-- 담당 매니저가 배정되어있으나 커미션비율이 없고, 월급이 3000초과인 
+-- 직원의이름, 매니저아이디, 커미션비율, 월급을출력
+SELECT first_name,
+    manager_id,
+    commission_pct,
+    salary
+FROM employees
+WHERE salary >= 3000 AND manager_id is not null AND commission_pct is null;
+
+-- SLACK 연습문제 4:
+-- 최고월급(max_salary)이10000 이상인
+-- 업무의 이름(job_title)과 최고월급(max_salary)을 
+-- 최고월급의(max_salary) 내림차순(DESC)로 정렬하여 출력
+SELECT job_title,
+    max_salary
+FROM jobs
+WHERE max_salary >= 10000
+ORDER BY max_salary DESC;
+
+-- SLACK 연습문제 5:
+-- 월급이 14000 미만 10000 이상인
+-- 직원의이름(first_name), 월급, 커미션 퍼센트를 
+-- 월급순(내림차순)출력. 단, 커미션 퍼센트가 null 이면 0 으로나타내시오
+SELECT first_name,
+    salary,
+    NVL(commission_pct, 0)
+FROM employees
+WHERE salary >= 10000 AND salary < 14000
+ORDER BY salary DESC;
+
+-- SLACK 연습문제 6:
+-- 부서번호가 10, 90, 100인 
+-- 직원의 이름, 월급, 입사일, 부서번호를 나타내시오
+-- 입사일은 1977-12 와 같이 표시하시오
+SELECT first_name,
+    salary,
+    TO_CHAR(hire_date, 'YYYY-MM-DD'),
+    department_id
+FROM employees
+WHERE department_id IN (10, 90, 100);
+
+-- SLACK 연습문제 7:
+-- 이름(first_name)에 S 또는 s 가 들어가는 직원의
+-- 이름, 월급을 나타내시오
+SELECT first_name,
+    salary
+FROM employees
+WHERE UPPER (first_name) LIKE '%S%';
+
+-- SLACK 연습문제 8:
+-- 전체부서를 출력, 순서는 부서이름이 긴 순서대로
+SELECT department_name
+FROM departments
+ORDER BY LENGTH(department_name) DESC;
+
+-- SLACK 연습문제 9:
+-- 지사가 있을 것으로 예상되는 나라들을 
+-- 나라이름을 대문자로 출력하고 올림차순(ASC)으로 정렬
+SELECT UPPER(country_name)
+FROM countries
+ORDER BY country_name;
+
+-- SLACK 연습문제 10:
+-- 입사일이 03/12/31일 이전 입사한 직원의 
+-- 이름, 월급, 전화번호, 입사일을 출력 
+-- 전화번호는 545-343-3433 과 같은 형태로 출력
+SELECT first_name,
+    salary,
+    REPLACE(phone_number, '.', '-'),
+    hire_date
+FROM employees
+WHERE TO_CHAR(hire_date, 'YYYYMMDD') < '20031231';
