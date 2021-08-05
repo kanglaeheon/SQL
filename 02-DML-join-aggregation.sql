@@ -248,3 +248,43 @@ FROM employees e, (SELECT department_id, MAX(salary) salary FROM employees
 WHERE  e.department_id = sal.department_id AND
     e.salary = sal.salary
 ORDER BY e.department_id;
+
+-- Correalated Query
+-- 외부 쿼리와 내부 쿼리가 연관관계를 맺는 쿼리
+SELECT e.department_id, e.employee_id, e.first_name, e.salary
+FROM employees e
+WHERE e.salary = (SELECT MAX(salary) FROM employees WHERE department_id = e.department_id)
+ORDER BY e.department_id;
+
+-- TOP-K Query
+-- ROWNUM : 레코드의 순서를 가리키는 가상의 컬럼(Pseudo)
+
+-- 2007년 입사자 중에서 급여순위 5위까지 출력
+SELECT rownum, first_name
+FROM (SELECT * FROM employees WHERE hire_date like '07%' ORDER BY salary DESC)
+WHERE rownum <= 5;
+
+-- 집합 연산 : SET
+-- UNION : 합집합, UNION ALL : 합집합(중복 요소 소거하지 않음)
+-- INTERSECT : 교집합, MINUS : 차집합
+
+-- 05/01/01 이전 입사자 쿼리
+SELECT first_name, salary, hire_date FROM employees WHERE hire_date < '05/01/01';
+-- 급여를 12000 초과 수령 사원
+SELECT first_name, salary, hire_date FROM employees WHERE salary > 12000;
+
+SELECT first_name, salary, hire_date FROM employees WHERE hire_date < '05/01/01'
+UNION -- 합집합
+SELECT first_name, salary, hire_date FROM employees WHERE salary > 12000;
+
+SELECT first_name, salary, hire_date FROM employees WHERE hire_date < '05/01/01'
+UNION ALL -- 합집합(중복 요소 제거하지 않음)
+SELECT first_name, salary, hire_date FROM employees WHERE salary > 12000;
+
+SELECT first_name, salary, hire_date FROM employees WHERE hire_date < '05/01/01'
+INTERSECT -- 교집합
+SELECT first_name, salary, hire_date FROM employees WHERE salary > 12000;
+
+SELECT first_name, salary, hire_date FROM employees WHERE hire_date < '05/01/01'
+MINUS -- 차집합
+SELECT first_name, salary, hire_date FROM employees WHERE salary > 12000;
