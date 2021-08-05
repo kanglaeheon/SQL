@@ -193,6 +193,6 @@ ORDER BY dept.department_id;
 SELECT emp.employee_id as 사번, emp.first_name as 이름, department_name as 부서명, man.first_name as 매니저이름
 FROM employees emp
     LEFT OUTER JOIN departments dept 
-        ON emp.department_id = dept.department_id;
-    JOIN employees man ON emp.manager_id = man.employee_id
-    
+        ON emp.department_id = dept.department_id
+    ,employees man 
+WHERE emp.manager_id = man.employee_id;
