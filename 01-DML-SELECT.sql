@@ -370,9 +370,11 @@ ORDER BY LENGTH(department_name) DESC;
 -- SLACK 연습문제 9:
 -- 지사가 있을 것으로 예상되는 나라들을 
 -- 나라이름을 대문자로 출력하고 올림차순(ASC)으로 정렬
-SELECT UPPER(country_name)
+SELECT UPPER(country_name),
+    region_id
 FROM countries
 ORDER BY country_name;
+
 
 -- SLACK 연습문제 10:
 -- 입사일이 03/12/31일 이전 입사한 직원의 
