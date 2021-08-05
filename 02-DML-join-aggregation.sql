@@ -181,3 +181,70 @@ SELECT department_id, job_id, SUM(salary)
 FROM employees
 GROUP BY CUBE(department_id, job_id)
 ORDER BY department_id;
+
+------------
+-- SUBQUERY
+------------
+-- Single-Row SubQuery
+-- 하나의 질의문 안에 다른 질의문을 포함하는 형태
+-- 전체 사원 중, 급여의 중앙값보다 많이 받는 사원
+
+-- 1. 급여의 중앙값?
+SELECT MEDIAN(salary) FROM employees; 
+-- 결과값인 6200은 하나의 Row이므로 Sing-Row SubQuery로 사용 가능
+
+-- 2. 급여의 중앙값보다 많이 받는 사원?
+SELECT first_name, salary
+FROM employees
+WHERE salary > (SELECT MEDIAN(salary) FROM employees);
+
+-- 3. Den 보다 늦게 입사한 사원?
+SELECT first_name, hire_date
+FROM employees
+WHERE hire_date >=
+    (SELECT hire_date FROM employees WHERE first_name = 'Den');
+    
+-- Multi-Row SubQuery
+-- 서브 쿼리의 결과 레코드가 둘 이상이 나올 때는 단일행 연산자를 사용할 수 없다.
+-- IN, ANY, ALL, EXISTS 등의 집합 연산자를 활용해야 함
+SELECT salary FROM employees WHERE department_id = 110; -- 2 ROW
+
+SELECT first_name, salary FROM employees WHERE salary =
+    (SELECT salary FROM employees WHERE department_id = 110); -- ERROR
+    
+-- 결과가 다중이면 집합 연산자를 활용
+-- salary가 12,008 OR salary = 8,300
+SELECT first_name, salary FROM employees WHERE salary IN
+    (SELECT salary FROM employees WHERE department_id = 110);
+    
+-- ALL(AND)
+-- salary > 12,008 AND salary > 8,300
+SELECT first_name, salary FROM employees WHERE salary > ALL
+    (SELECT salary FROM employees WHERE department_id = 110);
+    
+-- ANY(OR)
+-- salary > 12,008 OR salary > 8,300
+SELECT first_name, salary FROM employees WHERE salary > ANY
+    (SELECT salary FROM employees WHERE department_id = 110);
+
+-- 각 부서별로 최고 급여를 받는 사원을 출력
+-- 1. 각 부서의 최고 급여 확인 쿼리
+SELECT department_id, MAX(salary) FROM employees
+GROUP BY department_id;
+
+-- 2. 서브 쿼리의 결과 (department_id, MAX(salary))
+SELECT department_id, employee_id, first_name, salary
+FROM employees
+WHERE (department_id, salary) 
+    IN (SELECT department_id, MAX(salary) 
+        FROM employees 
+        GROUP BY department_id)
+ORDER BY department_id;
+
+-- 서브쿼리와 조인(임시 테이블 생성)
+SELECT e.department_id, e.employee_id, e.first_name, e.salary
+FROM employees e, (SELECT department_id, MAX(salary) salary FROM employees
+                    GROUP BY department_id) sal
+WHERE  e.department_id = sal.department_id AND
+    e.salary = sal.salary
+ORDER BY e.department_id;
