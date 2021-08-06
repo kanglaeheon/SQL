@@ -52,3 +52,58 @@ REVOKE select ON HR.EMPLOYEES FROM C##BITUSER;
 GRANT select ON HR.EMPLOYEES TO C##BITUSER;
 -- 전체 권한 부여시
 -- GRANT all privileges ... 
+
+-------------
+-- DDL
+-------------
+-- 이후 C##BITUSER로 진행
+
+-- 현재 내가 소유한 테이블 목록 확인
+SELECT * FROM tab;
+-- 현재 나에게 주어진 ROLE을 조회
+SELECT * FROM USERS_ROLE PRIVS;
+
+-- CREATE TABLE: 테이블 생성
+CREATE TABLE book (
+    book_id NUMBER(5),
+    title VARCHAR2(50),
+    author VARCHAR2(10),
+    pub_date DATE DEFAULT SYSDATE
+);
+
+SELECT * FROM tab;
+DESC book;
+
+-- 서브퀘리를 이용한 테이블 생성
+-- HR 스키마의 employees 테이블의 일부 데이터를 추출, 새 테이블 생성
+SELECT * FROM HR.employees;
+
+-- job_id가 IT_ 관련 직원들만 뽑아내어 새 테이블 결정
+CREATE TABLE it_emps AS (
+    SELECT * FROM HR.employees WHERE job_id LIKE 'IT_%'
+);
+    
+DESC IT_EMPS;
+SELECT * FROM IT_EMPS; -- 삭제
+
+-- author 테이블 추가
+-- 테이블 제약은 모든 컬렁 정의가 끝난 다음에 뒤쪽에다가 붙인다
+-- author_id를 PK로 지정
+CREATE TABLE author (
+    author_id NUMBER(10),
+    author_name VARCHAR2(50) NOT NULL, -- 컬럼 제약
+    author_desc VARCHAR2(500),
+    PRIMARY KEY (author_id) -- 테이블 제약
+    );
+DESC author;    
+-- book 테이블의 author 컬럼 지우기
+-- 나중에 author 테이블과 FK 연결
+DESC book;
+ALTER TABLE book DROP COLUMN author;
+
+-- author 테이블 참조를 위한 컬럼 author_id 추가
+ALTER TABLE book
+ADD (author_id NUMBER(10));
+
+-- book 테이블의 book_id도 NUMBER(10)으로 변경
+ALTER TABLE book MODIFY (book_id NUMBER(10));
