@@ -32,7 +32,7 @@ GROUP BY employee_id, salary, first_name;
 SELECT location_id as 도시아이디, street_address as 거리명, postal_code as 우편번호,
     city as 도시명, state_province as 주, country_id as 나라아이디
 FROM locations
-WHERE location_id IN (SELECT location_id FROM employees WHERE first_name = 'Steven');
+WHERE location_id = (SELECT location_id FROM employees WHERE department_id = (SELECT department_id FROM employees WHERE first_name = 'Steven' AND last_name='King'));
 
 -- 문제 4.
 -- job_id가 'ST_MAN'인 직원의 급여보다 작은 직원의 
@@ -91,9 +91,28 @@ WHERE salary > avgSalDep.sal AND e.department_id = avgsaldep.department_id;
 -- 직원 입사일이 11번째에서 15번째의 직원의 
 -- 사번, 이름, 급여, 입사일을 입사일 순서로 출력
 
+-- 선생님 풀이
+-- 서브쿼리
+SELECT ROWNUM, employee_id, first_name, salary, hire_date
+FROM employees
+ORDER BY hire_date asc;
+
+SELECT rownum rn, employee_id, first_name, salary, hire_date
+FROM (SELECT employee_id, first_name, salary, hire_date
+        FROM employees
+        ORDER BY hire_date asc);
+        
+-- 최종쿼리
+SELECT rn, employee_id, first_name, salary, hire_date
+FROM (SELECT rownum rn, employee_id, first_name, salary, hire_date 
+        FROM (SELECT employee_id, first_name, salary, hire_date
+                FROM employees
+                ORDER BY hire_date ASC))
+WHERE rn BETWEEN 11 AND 15;
+
 -- 서브쿼리
 SELECT hire_date, ROW_NUMBER() OVER (ORDER BY hire_date) FROM employees; -- 입사일 오름차순
 
-SELECT employee_id 사번, first_name 이름, salary 급여, e.hire_date 입사일
+SELECT tt.rn, employee_id 사번, first_name 이름, salary 급여, e.hire_date 입사일
 FROM employees e, (SELECT hire_date hd, RANK() OVER (ORDER BY hire_date) rn FROM employees) tt -- tt = Temporary Table
 WHERE tt.hd = e.hire_date AND tt.rn <= 15 AND tt.rn >= 11;
